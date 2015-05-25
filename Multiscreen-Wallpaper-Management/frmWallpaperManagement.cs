@@ -183,6 +183,23 @@ namespace MultiScreenWallpaper
 
                 //Set wallpaper
                 SetDWallpaper(appPath + "/wallpaper.jpg");
+
+                //Close the config file
+                streamReaderJson.Close();
+
+                //Set index to 0
+                i = 0;
+
+                //Loop for every image in imgwallpapers
+                foreach(var nul in imgwallpapers)
+                {
+
+                    //Dispose image stored
+                    imgwallpapers[i].Dispose();
+
+                    //Add one to index
+                    i++;
+                }
             }
 
             else
