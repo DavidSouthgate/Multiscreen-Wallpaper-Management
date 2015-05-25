@@ -16,6 +16,10 @@ E.g. If the user uses WIN+P to adjust monitor configuration. The wallpaper will 
 <b>Not Supported:</b></br>
 <img src="https://i.imgur.com/mhNOmVg.png"></img>
 
+## Requirements
+* <a href="http://www.newtonsoft.com/json">Json.NET</a> </br>
+Popular high-performance JSON framework for .NET 
+
 ##Configuration
 The configuration is stored in config.json in the directory of the executable.
 
