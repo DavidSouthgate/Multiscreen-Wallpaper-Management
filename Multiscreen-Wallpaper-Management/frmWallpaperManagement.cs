@@ -124,8 +124,13 @@ namespace MultiScreenWallpaper
                 foreach (var nul in wallpaperFiles)
                 {
 
-                    //Store wallpaper image to variable
-                    imgwallpapers.Add(Image.FromFile(wallpaperFiles[i]));
+                    //If image file exists
+                    if (File.Exists(wallpaperFiles[i]))
+                    {
+
+                        //Store wallpaper image to variable
+                        imgwallpapers.Add(Image.FromFile(wallpaperFiles[i]));
+                    }
 
                     //Add one to index
                     i++;
