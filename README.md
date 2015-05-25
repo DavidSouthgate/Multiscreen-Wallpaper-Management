@@ -3,6 +3,10 @@ This allows wallpapers to be managed in a multiple monitor setup. If resolution 
 
 E.g. If the user uses WIN+P to adjust monitor configuration. The wallpaper will be adjusted so that it still looks correct.
 
+## Requirements
+* <a href="http://www.newtonsoft.com/json">Json.NET</a> </br>
+Popular high-performance JSON framework for .NET 
+
 ## Known Issues and Constraints
 * Vertical monitor configurations are not currently supported. </br>
 <b>Supported:</b></br>

@@ -1,8 +1,7 @@
 ﻿/* The MIT License (MIT)
  * 
  * Copyright (c) 2015 David Southgate
- * dav@davidsouthgate.co.uk
- * github.com/DavidSouthgate/Multiscreen-Wallpaper-Management
+ * https://github.com/DavidSouthgate/Multiscreen-Wallpaper-Management
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
