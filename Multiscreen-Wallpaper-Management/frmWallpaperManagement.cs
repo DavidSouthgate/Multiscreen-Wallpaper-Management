@@ -51,30 +51,35 @@ namespace MultiScreenWallpaper
             }
         }
 
+        //Gets the greatest common divisor of a and b
         static int GCD(int a, int b)
         {
             int Remainder;
-
             while (b != 0)
             {
                 Remainder = a % b;
                 a = b;
                 b = Remainder;
             }
-
             return a;
         }
 
-        private string aspectRatio(int x, int y)
+        //CALCULATE ASPECT RATIO FROM WIDTH AND HEIGHT
+        private string aspectRatio(int x,   //Width of image
+                                   int y)   //Height of image
         {
+
+            //Return aspect ratio
             return string.Format("{0}:{1}", x / GCD(x, y), y / GCD(x, y));
         }
 
+        //GENERATES THE WALLPAPER AND APPLIES IT
         private void loadWallpaper()
         {
             int i;                          //Declare variable used for an index
             int wallpaperTotalWidth = 0;    //Declare variable used for total wallpaper width
             int wallpaperTotalHeight = 0;   //Declare variable used for total wallpaper height
+            string sJson = "";              //Declare variable used to store json from config
 
             //Get total wallpaper size
             wallpaperTotalSize(ref wallpaperTotalWidth, ref wallpaperTotalHeight);
@@ -82,8 +87,7 @@ namespace MultiScreenWallpaper
             //Declare list used for storing config
             List<string>[] config = new List<string>[2];
 
-            string sJson = "";
-
+            //If the config.json file exists
             if (File.Exists(Application.StartupPath + @"\config.json"))
             {
                 //Declare variable used to open config
@@ -149,8 +153,6 @@ namespace MultiScreenWallpaper
                 foreach (var screenName in screenNames)
                 {
 
-                    bool wallpaperFound = false;
-
                     //Loop for every screen
                     foreach (var screen in Screen.AllScreens)
                     {
@@ -159,22 +161,17 @@ namespace MultiScreenWallpaper
                         if (screenName == screen.DeviceName)
                         {
 
+                            //Loof for every wallpaper image
                             foreach (var wallpaper in imgwallpapers)
                             {
+
+                                //If the aspect ration of the wallpaper is equal to the aspect ratio of the screen resolution
                                 if(aspectRatio(screen.Bounds.Width, screen.Bounds.Height) == aspectRatio(wallpaper.Width, wallpaper.Height))
                                 {
                                     //Add wallpaper image to template
                                     gWallpaper.DrawImage(wallpaper, new Rectangle(screenWidthUsed, 0, screen.Bounds.Width, screen.Bounds.Height));
 
-                                    wallpaperFound = true;
                                 }
-                            }
-
-                            if (wallpaperFound == false)
-                            {
-
-                                //Add wallpaper image to template
-                                gWallpaper.DrawImage(new Bitmap(1, 1), new Rectangle(screenWidthUsed, 0, screen.Bounds.Width, screen.Bounds.Height));
                             }
 
                             //Add screen width to the screen width used
@@ -209,19 +206,31 @@ namespace MultiScreenWallpaper
 
             else
             {
+
+                //Display error message when no config exists
                 MessageBox.Show("Wallpaper Management: Config Not Found");
+
+                //Close the program
                 this.Close();
             }
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        //FORM LOADED
+        private void Form_Load(object sender, EventArgs e)
         {
+
+            //Make form invisible
             Opacity = 0;
+
+            //Generates the wallpaper and applies it
             loadWallpaper();
         }
 
+        //FORM DISPLAYED
         private void Form_Shown(object sender, EventArgs e)
         {
+
+            //Make form invisible
             Visible = false;
             Opacity = 100;
         }

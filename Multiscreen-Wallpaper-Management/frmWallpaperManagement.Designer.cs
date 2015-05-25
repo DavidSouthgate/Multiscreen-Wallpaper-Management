@@ -39,7 +39,7 @@
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
             this.Text = "Wallpaper Management";
-            this.Load += new System.EventHandler(this.Form1_Load);
+            this.Load += new System.EventHandler(this.Form_Load);
             this.ResumeLayout(false);
 
         }
