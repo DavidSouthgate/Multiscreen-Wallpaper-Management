@@ -88,6 +88,26 @@ namespace MultiScreenWallpaper
             return a;
         }
 
+        public class configScreenClass
+        {
+            public string name { get; set; }
+            public string wallpaper { get; set; }
+            public int padding_top { get; set; }
+        }
+
+        public class configMiscClass
+        {
+            public string name { get; set; }
+            public string wallpaper { get; set; }
+            public int padding_top { get; set; }
+        }
+
+        public class configClass
+        {
+            public List<configScreenClass> screens { get; set; }
+            public List<configMiscClass> misc { get; set; }
+        }
+
         //CALCULATE ASPECT RATIO FROM WIDTH AND HEIGHT
         private string aspectRatio(int x,   //Width of image
                                    int y)   //Height of image
@@ -108,8 +128,7 @@ namespace MultiScreenWallpaper
             //Get total wallpaper size
             wallpaperTotalSize(ref wallpaperTotalWidth, ref wallpaperTotalHeight);
 
-            //Declare list used for storing config
-            List<string>[] config = new List<string>[2];
+            var config = new configClass();
 
             //If the config.json file exists
             if (File.Exists(Application.StartupPath + @"\config.json"))
@@ -128,7 +147,7 @@ namespace MultiScreenWallpaper
                 {
 
                     //Parse json config
-                    config = JsonConvert.DeserializeObject<List<string>[]>(sJson);
+                    config = JsonConvert.DeserializeObject<configClass>(sJson);
                 }
 
                 //If parsing fails
@@ -136,34 +155,30 @@ namespace MultiScreenWallpaper
                 {
 
                     //Parse blank config
-                    config = JsonConvert.DeserializeObject<List<string>[]>("[]");
+                    config = JsonConvert.DeserializeObject<configClass>("[]");
                 }
 
-                var screenNames = new List<string>();       //Declare variable for storing screen names from config
-                var wallpaperFiles = new List<string>();    //Declare variable for storing wallpaper file names from config
-                screenNames = config[0];                    //Store wallpaper files from config
-                wallpaperFiles = config[1];                 //Store screen names from config
                 var imgwallpapers = new List<Image>();      //Declare variable for storing the wallpaper images
 
                 //Reset index counter
                 i = 0;
 
                 //Loop for every wallpaper file
-                foreach (var nul in wallpaperFiles)
+                foreach (var screens in config.screens)
                 {
 
                     //If image file exists
-                    if (File.Exists(wallpaperFiles[i]))
+                    if (File.Exists(screens.wallpaper))
                     {
 
                         //Store wallpaper image to variable
-                        imgwallpapers.Add(Image.FromFile(wallpaperFiles[i]));
+                        imgwallpapers.Add(Image.FromFile(screens.wallpaper));
                     }
 
                     //Add one to index
                     i++;
                 }
-
+                
                 //Create wallpaper template
                 Image imgWallpaper = new Bitmap(wallpaperTotalWidth, wallpaperTotalHeight);
 
@@ -174,15 +189,15 @@ namespace MultiScreenWallpaper
                 int screenWidthUsed = 0;
 
                 //Loop for ever screen name
-                foreach (var screenName in screenNames)
+                foreach (var configScreen in config.screens)
                 {
 
                     //Loop for every screen
-                    foreach (var screen in Screen.AllScreens)
+                    foreach (var displayScreen in Screen.AllScreens)
                     {
 
                         //If the name of the screen is equal to the X screen from config
-                        if (screenName == screen.DeviceName)
+                        if (configScreen.name == displayScreen.DeviceName)
                         {
 
                             //Loof for every wallpaper image
@@ -190,20 +205,20 @@ namespace MultiScreenWallpaper
                             {
 
                                 //If the aspect ration of the wallpaper is equal to the aspect ratio of the screen resolution
-                                if(aspectRatio(screen.Bounds.Width, screen.Bounds.Height) == aspectRatio(wallpaper.Width, wallpaper.Height))
+                                if(aspectRatio(displayScreen.Bounds.Width, displayScreen.Bounds.Height) == aspectRatio(wallpaper.Width, wallpaper.Height))
                                 {
                                     //Add wallpaper image to template
-                                    gWallpaper.DrawImage(wallpaper, new Rectangle(screenWidthUsed, 0, screen.Bounds.Width, screen.Bounds.Height));
+                                    gWallpaper.DrawImage(wallpaper, new Rectangle(screenWidthUsed, 0, displayScreen.Bounds.Width, displayScreen.Bounds.Height));
 
                                 }
                             }
 
                             //Add screen width to the screen width used
-                            screenWidthUsed = screenWidthUsed + screen.Bounds.Width;
+                            screenWidthUsed = screenWidthUsed + displayScreen.Bounds.Width;
                         }
                     }
                 }
-
+                
                 //Save wallpaper
                 imgWallpaper.Save("wallpaper.png");
 
