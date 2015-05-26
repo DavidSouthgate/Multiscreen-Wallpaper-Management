@@ -1,7 +1,8 @@
 ﻿/* The MIT License (MIT)
  * 
  * Copyright (c) 2015 David Southgate
- * https://github.com/DavidSouthgate/Multiscreen-Wallpaper-Management
+ * github.com/DavidSouthgate/Multiscreen-Wallpaper-Management
+ * dav@davidsouthgate.co.uk
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to deal
@@ -204,10 +205,10 @@ namespace MultiScreenWallpaper
                 }
 
                 //Save wallpaper
-                imgWallpaper.Save("wallpaper.jpg");
+                imgWallpaper.Save("wallpaper.png");
 
                 //Set wallpaper
-                SetDWallpaper(appPath + "/wallpaper.jpg");
+                SetDWallpaper(appPath + "/wallpaper.png");
 
                 //Close the config file
                 streamReaderJson.Close();
