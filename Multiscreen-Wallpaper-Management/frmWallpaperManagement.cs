@@ -62,8 +62,27 @@ namespace MultiScreenWallpaper
             loadWallpaper();
         }
 
-        private void wallpaperTotalSize(ref int wallpaperTotalWidth, ref int wallpaperTotalHeight)
+        private void wallpaperTotalSize(ref int wallpaperTotalWidth, ref int wallpaperTotalHeight, configClass config)
         {
+            foreach (var displayScreen in Screen.AllScreens)
+            {
+                wallpaperTotalWidth = wallpaperTotalWidth + displayScreen.Bounds.Width;
+
+                foreach (var configScreen in config.screens)
+                {
+                
+                    if(configScreen.name == displayScreen.DeviceName)
+                    {
+                        if(displayScreen.Bounds.Height + configScreen.padding_top > wallpaperTotalHeight)
+                        {
+                            wallpaperTotalHeight = displayScreen.Bounds.Height + configScreen.padding_top;
+                        }
+                    }
+                }
+            }
+
+
+            /*
             foreach (var screen in Screen.AllScreens)
             {
                 wallpaperTotalWidth = wallpaperTotalWidth + screen.Bounds.Width;
@@ -73,6 +92,7 @@ namespace MultiScreenWallpaper
                     wallpaperTotalHeight = screen.Bounds.Height;
                 }
             }
+            */
         }
 
         //Gets the greatest common divisor of a and b
@@ -125,9 +145,6 @@ namespace MultiScreenWallpaper
             int wallpaperTotalHeight = 0;   //Declare variable used for total wallpaper height
             string sJson = "";              //Declare variable used to store json from config
 
-            //Get total wallpaper size
-            wallpaperTotalSize(ref wallpaperTotalWidth, ref wallpaperTotalHeight);
-
             var config = new configClass();
 
             //If the config.json file exists
@@ -157,6 +174,9 @@ namespace MultiScreenWallpaper
                     //Parse blank config
                     config = JsonConvert.DeserializeObject<configClass>("[]");
                 }
+
+                //Get total wallpaper size
+                wallpaperTotalSize(ref wallpaperTotalWidth, ref wallpaperTotalHeight, config);
 
                 var imgwallpapers = new List<Image>();      //Declare variable for storing the wallpaper images
 
@@ -208,7 +228,7 @@ namespace MultiScreenWallpaper
                                 if(aspectRatio(displayScreen.Bounds.Width, displayScreen.Bounds.Height) == aspectRatio(wallpaper.Width, wallpaper.Height))
                                 {
                                     //Add wallpaper image to template
-                                    gWallpaper.DrawImage(wallpaper, new Rectangle(screenWidthUsed, 0, displayScreen.Bounds.Width, displayScreen.Bounds.Height));
+                                    gWallpaper.DrawImage(wallpaper, new Rectangle(screenWidthUsed, configScreen.padding_top, displayScreen.Bounds.Width, displayScreen.Bounds.Height));
 
                                 }
                             }
