@@ -204,10 +204,10 @@ namespace MultiScreenWallpaper
                 }
 
                 //Save wallpaper
-                imgWallpaper.Save("wallpaper.jpg");
+                imgWallpaper.Save("wallpaper.png");
 
                 //Set wallpaper
-                SetDWallpaper(appPath + "/wallpaper.jpg");
+                SetDWallpaper(appPath + "/wallpaper.png");
 
                 //Close the config file
                 streamReaderJson.Close();
