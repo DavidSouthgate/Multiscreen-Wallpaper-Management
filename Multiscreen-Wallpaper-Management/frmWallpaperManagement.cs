@@ -45,8 +45,11 @@ namespace MultiScreenWallpaper
         const uint SPIF_UPDATEINIFILE = 0x01;
         string appPath = Path.GetDirectoryName(Application.ExecutablePath);
 
+        //USED TO SET WALLPAPER
         public void SetDWallpaper(string path)
         {
+
+            //Set wallpaper to image at given path
             SystemParametersInfo(SPI_SETDESKWALLPAPER, 0, path, SPIF_UPDATEINIFILE);
         }
 
@@ -54,14 +57,20 @@ namespace MultiScreenWallpaper
         {
             
             InitializeComponent();
+
+            //Add event to run when display settings change
             Microsoft.Win32.SystemEvents.DisplaySettingsChanged += new EventHandler(ScreenHandler);
         }
 
+        //RUNS WHEN DISPLAY SETTINGS CHANGE
         private void ScreenHandler(object sender, EventArgs e)
         {
+
+            //Generates the wallpaper and applies it
             loadWallpaper();
         }
 
+        //CALCULATE TOTAL WALLPAPER SIZE
         private void wallpaperTotalSize(ref int wallpaperTotalWidth, ref int wallpaperTotalHeight, configClass config)
         {
             foreach (var displayScreen in Screen.AllScreens)
@@ -80,22 +89,9 @@ namespace MultiScreenWallpaper
                     }
                 }
             }
-
-
-            /*
-            foreach (var screen in Screen.AllScreens)
-            {
-                wallpaperTotalWidth = wallpaperTotalWidth + screen.Bounds.Width;
-
-                if (screen.Bounds.Height > wallpaperTotalHeight)
-                {
-                    wallpaperTotalHeight = screen.Bounds.Height;
-                }
-            }
-            */
         }
 
-        //Gets the greatest common divisor of a and b
+        //GETS THE GREATEST COMMON DIVISOR OF A AND B
         static int GCD(int a, int b)
         {
             int Remainder;
@@ -108,13 +104,15 @@ namespace MultiScreenWallpaper
             return a;
         }
 
+        //CLASS USED TO STORE SCREEN CONFIG
         public class configScreenClass
         {
             public string name { get; set; }
-            public string wallpaper { get; set; }
+            public List<string> wallpaper { get; set; }
             public int padding_top { get; set; }
         }
 
+        //CLASS USED TO STORE MISC CONFIG
         public class configMiscClass
         {
             public string name { get; set; }
@@ -122,6 +120,7 @@ namespace MultiScreenWallpaper
             public int padding_top { get; set; }
         }
 
+        //CLASS USED TO STORE CONFIG
         public class configClass
         {
             public List<configScreenClass> screens { get; set; }
@@ -140,18 +139,16 @@ namespace MultiScreenWallpaper
         //GENERATES THE WALLPAPER AND APPLIES IT
         private void loadWallpaper()
         {
-            int i;                          //Declare variable used for an index
-            int wallpaperTotalWidth = 0;    //Declare variable used for total wallpaper width
-            int wallpaperTotalHeight = 0;   //Declare variable used for total wallpaper height
-            string sJson = "";              //Declare variable used to store json from config
-
-            var config = new configClass();
 
             //If the config.json file exists
             if (File.Exists(Application.StartupPath + @"\config.json"))
             {
-                //Declare variable used to open config
-                StreamReader streamReaderJson;
+                int i;                          //Declare variable used for an index
+                int wallpaperTotalWidth = 0;    //Declare variable used for total wallpaper width
+                int wallpaperTotalHeight = 0;   //Declare variable used for total wallpaper height
+                string sJson = "";              //Declare variable used to store json from config
+                var config = new configClass(); //Declare variable used to store configuration
+                StreamReader streamReaderJson;  //Declare variable used to open config
 
                 //Read config
                 streamReaderJson = new StreamReader(Application.StartupPath + @"\config.json");
@@ -187,12 +184,16 @@ namespace MultiScreenWallpaper
                 foreach (var screens in config.screens)
                 {
 
+                    Random randomNumber = new Random();                         //Declare variable used to generate random number for random wallpaper
+                    int wallpaperCount = screens.wallpaper.Count;               //Declare integer and store wallpaper count in it
+                    int wallpaperRandom = randomNumber.Next(0, wallpaperCount); //Generate a random number for random wallpaper
+
                     //If image file exists
-                    if (File.Exists(screens.wallpaper))
+                    if (File.Exists(screens.wallpaper[wallpaperRandom]))
                     {
 
                         //Store wallpaper image to variable
-                        imgwallpapers.Add(Image.FromFile(screens.wallpaper));
+                        imgwallpapers.Add(Image.FromFile(screens.wallpaper[wallpaperRandom]));
                     }
 
                     //Add one to index
@@ -279,7 +280,7 @@ namespace MultiScreenWallpaper
         {
 
             //Make form invisible
-            Opacity = 0;
+            ////////////Opacity = 0;////////////////////////////////////////////////////////////////////////////////////////
 
             //Generates the wallpaper and applies it
             loadWallpaper();
@@ -290,8 +291,8 @@ namespace MultiScreenWallpaper
         {
 
             //Make form invisible
-            Visible = false;
-            Opacity = 100;
+            ////////////Visible = false;////////////////////////////////////////////////////////////////////////////////////
+            ////////////Opacity = 100;//////////////////////////////////////////////////////////////////////////////////////
         }
     }
 }
