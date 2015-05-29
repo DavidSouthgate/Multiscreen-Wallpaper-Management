@@ -111,7 +111,7 @@ namespace MultiScreenWallpaper
         public class configScreenClass
         {
             public string name { get; set; }
-            public List<string> wallpaper { get; set; }
+            public string wallpaper { get; set; }
             public int padding_top { get; set; }
         }
 
@@ -140,20 +140,20 @@ namespace MultiScreenWallpaper
         //GENERATES THE WALLPAPER AND APPLIES IT
         private void loadWallpaper()
         {
+            int i;                          //Declare variable used for an index
+            int wallpaperTotalWidth = 0;    //Declare variable used for total wallpaper width
+            int wallpaperTotalHeight = 0;   //Declare variable used for total wallpaper height
+            string sJson = "";              //Declare variable used to store json from config
+
+            var config = new configClass();
 
             //If the config.json file exists
             if (File.Exists(Application.StartupPath + @"\config.json"))
             {
-                int i;                              //Declare variable used for an index
-                int wallpaperTotalWidth = 0;        //Declare variable used for total wallpaper width
-                int wallpaperTotalHeight = 0;       //Declare variable used for total wallpaper height
-                string sJson = "";                  //Declare variable used to store json from config
-                Random randomNumber = new Random(); //Used to generate random wallpaper
+                //Declare variable used to open config
+                StreamReader streamReaderJson;
 
-                var config = new configClass();     //Declare variable used to store configuration
-                StreamReader streamReaderJson;      //Declare variable used to open config
-
-                //Read config from file
+                //Read config
                 streamReaderJson = new StreamReader(Application.StartupPath + @"\config.json");
 
                 //Stroe contents of config.json in variable
@@ -187,18 +187,12 @@ namespace MultiScreenWallpaper
                 foreach (var screens in config.screens)
                 {
 
-                    //Count number of screens in config
-                    int wallpaperCount = screens.wallpaper.Count;
-
-                    //Generate random wallpaper
-                    int wallpaperRandom = randomNumber.Next(0, wallpaperCount);
-
                     //If image file exists
-                    if (File.Exists(screens.wallpaper[wallpaperRandom]))
+                    if (File.Exists(screens.wallpaper))
                     {
 
                         //Store wallpaper image to variable
-                        imgwallpapers.Add(Image.FromFile(screens.wallpaper[wallpaperRandom]));
+                        imgwallpapers.Add(Image.FromFile(screens.wallpaper));
                     }
 
                     //Add one to index
