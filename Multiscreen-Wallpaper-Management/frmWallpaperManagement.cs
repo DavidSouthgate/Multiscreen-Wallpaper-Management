@@ -62,9 +62,37 @@ namespace MultiScreenWallpaper
             Microsoft.Win32.SystemEvents.DisplaySettingsChanged += new EventHandler(ScreenHandler);
         }
 
+        //PROCESSES WINDOWS MESSAGES
+        protected override void WndProc(ref Message m)
+        {
+            
+            //If message says to update
+            if (m.Msg == NativeMethods.UPDATE)
+            {
+
+                //Output debug message
+                debugMessageOutput("Message to program saying update");
+
+                //Update the wallpaper and set ti
+                loadWallpaper();
+            }
+
+            //If message says to show debug
+            else if (m.Msg == NativeMethods.DEBUG)
+            {
+
+                //Make form visible
+                displayForm();
+            }
+                base.WndProc(ref m);
+        }
+
         //RUNS WHEN DISPLAY SETTINGS CHANGE
         private void ScreenHandler(object sender, EventArgs e)
         {
+
+            //Output debug message
+            debugMessageOutput("Display settings changed");
 
             //Generates the wallpaper and applies it
             loadWallpaper();
@@ -140,6 +168,9 @@ namespace MultiScreenWallpaper
         private void loadWallpaper()
         {
 
+            //Output debug message
+            debugMessageOutput("Begin loading wallpaper");
+
             //If the config.json file exists
             if (File.Exists(Application.StartupPath + @"\config.json"))
             {
@@ -156,12 +187,18 @@ namespace MultiScreenWallpaper
                 //Stroe contents of config.json in variable
                 sJson = streamReaderJson.ReadToEnd();
 
+                //Output debug message
+                debugMessageOutput("Read contents of config.json");
+
                 //Attempt to parse string
                 try
                 {
 
                     //Parse json config
                     config = JsonConvert.DeserializeObject<configClass>(sJson);
+
+                    //Output debug message
+                    debugMessageOutput("Successfully parsed config");
                 }
 
                 //If parsing fails
@@ -170,10 +207,16 @@ namespace MultiScreenWallpaper
 
                     //Parse blank config
                     config = JsonConvert.DeserializeObject<configClass>("[]");
+
+                    //Output debug message
+                    debugMessageOutput("Unsuccessfully parsed config", true);
                 }
 
                 //Get total wallpaper size
                 wallpaperTotalSize(ref wallpaperTotalWidth, ref wallpaperTotalHeight, config);
+
+                //Output debug message
+                debugMessageOutput("Total wallpaper size: " + wallpaperTotalWidth + "x" + wallpaperTotalHeight);
 
                 var imgwallpapers = new List<Image>();      //Declare variable for storing the wallpaper images
 
@@ -231,6 +274,8 @@ namespace MultiScreenWallpaper
                                     //Add wallpaper image to template
                                     gWallpaper.DrawImage(wallpaper, new Rectangle(screenWidthUsed, configScreen.padding_top, displayScreen.Bounds.Width, displayScreen.Bounds.Height));
 
+                                    //Output debug message
+                                    debugMessageOutput("Wallpaper drawn on screen " + configScreen.name);
                                 }
                             }
 
@@ -243,8 +288,14 @@ namespace MultiScreenWallpaper
                 //Save wallpaper
                 imgWallpaper.Save("wallpaper.png");
 
+                //Output debug message
+                debugMessageOutput("Saved wallpaper.png");
+
                 //Set wallpaper
                 SetDWallpaper(appPath + "/wallpaper.png");
+
+                //Output debug message
+                debugMessageOutput("Set wallpaper.png as wallpaper");
 
                 //Close the config file
                 streamReaderJson.Close();
@@ -267,6 +318,9 @@ namespace MultiScreenWallpaper
             else
             {
 
+                //Output debug message
+                debugMessageOutput("Config not found");
+
                 //Display error message when no config exists
                 MessageBox.Show("Wallpaper Management: Config Not Found");
 
@@ -280,10 +334,21 @@ namespace MultiScreenWallpaper
         {
 
             //Make form invisible
-            ////////////Opacity = 0;////////////////////////////////////////////////////////////////////////////////////////
+            Opacity = 0;
 
             //Generates the wallpaper and applies it
             loadWallpaper();
+
+            string[] args = Environment.GetCommandLineArgs();
+
+            foreach (string arg in args)
+            {
+                if (arg == "-debug")
+                {
+
+                    displayForm();
+                }
+            }
         }
 
         //FORM DISPLAYED
@@ -291,8 +356,35 @@ namespace MultiScreenWallpaper
         {
 
             //Make form invisible
-            ////////////Visible = false;////////////////////////////////////////////////////////////////////////////////////
-            ////////////Opacity = 100;//////////////////////////////////////////////////////////////////////////////////////
+            //Visible = false;
+            //Opacity = 100;
+
+        }
+
+
+        public class debugListItem
+        {
+            public debugListItem(Color c, string m)
+            {
+                ItemColor = c;
+                Message = m;
+            }
+            public Color ItemColor { get; set; }
+            public string Message { get; set; }
+        }
+        private void debugMessageOutput(string message, bool important = false)
+        {
+            if(important == true)
+            {
+                message = "IMPORTANT: " + message;
+            }
+
+            listOutput.Items.Add(message);
+        }
+        private void displayForm()
+        {
+            Opacity = 100;
+            this.ShowInTaskbar = true;
         }
     }
 }

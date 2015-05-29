@@ -52,13 +52,22 @@ namespace MultiScreenWallpaper
         /// </summary>
         private void InitializeComponent()
         {
+            this.listOutput = new System.Windows.Forms.ListBox();
             this.SuspendLayout();
+            // 
+            // listOutput
+            // 
+            this.listOutput.Location = new System.Drawing.Point(12, 12);
+            this.listOutput.Name = "listOutput";
+            this.listOutput.Size = new System.Drawing.Size(677, 407);
+            this.listOutput.TabIndex = 0;
             // 
             // frmWallpaperManagement
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(287, 81);
+            this.ClientSize = new System.Drawing.Size(701, 437);
+            this.Controls.Add(this.listOutput);
             this.Name = "frmWallpaperManagement";
             this.ShowIcon = false;
             this.ShowInTaskbar = false;
@@ -69,6 +78,8 @@ namespace MultiScreenWallpaper
         }
 
         #endregion
+
+        private System.Windows.Forms.ListBox listOutput;
     }
 }
 
