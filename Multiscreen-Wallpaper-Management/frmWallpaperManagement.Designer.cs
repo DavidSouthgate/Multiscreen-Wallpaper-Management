@@ -52,6 +52,7 @@ namespace MultiScreenWallpaper
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.grpOutput = new System.Windows.Forms.GroupBox();
             this.listOutput = new System.Windows.Forms.ListBox();
             this.grpConfig = new System.Windows.Forms.GroupBox();
@@ -62,6 +63,7 @@ namespace MultiScreenWallpaper
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.cmdExit = new System.Windows.Forms.Button();
             this.cmdUpdate = new System.Windows.Forms.Button();
+            this.update = new System.Windows.Forms.Timer(this.components);
             this.grpOutput.SuspendLayout();
             this.grpConfig.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -168,6 +170,10 @@ namespace MultiScreenWallpaper
             this.cmdUpdate.UseVisualStyleBackColor = true;
             this.cmdUpdate.Click += new System.EventHandler(this.cmdUpdate_Click);
             // 
+            // update
+            // 
+            this.update.Tick += new System.EventHandler(this.update_Tick);
+            // 
             // frmWallpaperManagement
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -199,6 +205,7 @@ namespace MultiScreenWallpaper
         private System.Windows.Forms.Button cmdUpdate;
         private System.Windows.Forms.Button cmdConfigValidate;
         private System.Windows.Forms.Button cmdExit;
+        private System.Windows.Forms.Timer update;
     }
 }
 
