@@ -51,6 +51,14 @@ The configuration is stored in config.json in the directory of the executable.
     <td>Another wallpaper that would work best on \\.\DISPLAY2</td>
   </tr>
   <tr>
+    <td>"padding_top":56</td>
+    <td>DISPLAY1 is 56 pixels below DISPLAY2</td>
+  </tr>
+  <tr>
+    <td>"padding_top":0</td>
+    <td>DISPLAY2 is 0 pixels below top of configuration</td>
+  </tr>
+  <tr>
     <td>Screen2.png</td>
     <td>Wallpaper that would work best on \\.\DISPLAY1</td>
   </tr>
