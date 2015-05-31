@@ -121,8 +121,9 @@ namespace MultiScreenWallpaper
         }
 
         //CALCULATE TOTAL WALLPAPER SIZE
-        private void wallpaperTotalSize(ref int wallpaperTotalWidth, ref int wallpaperTotalHeight, configClass config, int minumumPaddingTop)
+        private void wallpaperTotalSize(ref int wallpaperTotalWidth, ref int wallpaperTotalHeight, configClass config)
         {
+
             //For every screen on the system
             foreach (var displayScreen in Screen.AllScreens)
             {
@@ -139,55 +140,15 @@ namespace MultiScreenWallpaper
                     {
 
                         //If the total wallpaper height is smaller than the current screen height
-                        if(displayScreen.Bounds.Height + (configScreen.padding_top - minumumPaddingTop) > wallpaperTotalHeight)
+                        if(displayScreen.Bounds.Height + configScreen.padding_top > wallpaperTotalHeight)
                         {
 
                             //Set total wallpaper height
-                            wallpaperTotalHeight = displayScreen.Bounds.Height + (configScreen.padding_top - minumumPaddingTop);
+                            wallpaperTotalHeight = displayScreen.Bounds.Height + configScreen.padding_top;
                         }
                     }
                 }
             }
-        }
-
-        //CALCULATE SMALLEST PADDING TOP
-        private int wallpaperMinimumPaddingTop(configClass config)
-        {
-            int minumumPaddingTop = 0;
-            bool minumumPaddingTopFirstSet = false;
-
-            //For every screen on the system
-            foreach (var displayScreen in Screen.AllScreens)
-            {
-
-                //For each screen in config
-                foreach (var configScreen in config.screens)
-                {
-
-                    //If the name of the current system screen is the config screen name
-                    if (configScreen.name == displayScreen.DeviceName)
-                    {
-
-                        //If no minimum padding has been set
-                        if(minumumPaddingTopFirstSet == false)
-                        {
-
-                            //Set minimum padding to first screen top padding
-                            minumumPaddingTop = configScreen.padding_top;
-                        }
-
-                        //Otherwise, of screen top padding is smaller than the minimum top padding
-                        else if(configScreen.padding_top < minumumPaddingTop)
-                        {
-
-                            //Set minimum padding to screen top padding
-                            minumumPaddingTop = configScreen.padding_top;
-                        }
-                    }
-                }
-            }
-
-            return minumumPaddingTop;
         }
 
         //GETS THE GREATEST COMMON DIVISOR OF A AND B
@@ -283,10 +244,8 @@ namespace MultiScreenWallpaper
                     debugMessageOutput("Unsuccessfully parsed config", true);
                 }
 
-                int minumumPaddingTop = wallpaperMinimumPaddingTop(config);
-
                 //Get total wallpaper size
-                wallpaperTotalSize(ref wallpaperTotalWidth, ref wallpaperTotalHeight, config, minumumPaddingTop);
+                wallpaperTotalSize(ref wallpaperTotalWidth, ref wallpaperTotalHeight, config);
 
                 //Output debug message
                 debugMessageOutput("Total wallpaper size: " + wallpaperTotalWidth + "x" + wallpaperTotalHeight);
@@ -307,9 +266,6 @@ namespace MultiScreenWallpaper
                     //If image file exists
                     if (File.Exists(screens.wallpaper[wallpaperRandom]))
                     {
-
-                        //Output debug message
-                        debugMessageOutput("Using " + screens.wallpaper[wallpaperRandom]);
 
                         //Store wallpaper image to variable
                         imgwallpapers.Add(Image.FromFile(screens.wallpaper[wallpaperRandom]));
@@ -348,7 +304,7 @@ namespace MultiScreenWallpaper
                                 if(aspectRatio(displayScreen.Bounds.Width, displayScreen.Bounds.Height) == aspectRatio(wallpaper.Width, wallpaper.Height))
                                 {
                                     //Add wallpaper image to template
-                                    gWallpaper.DrawImage(wallpaper, new Rectangle(screenWidthUsed, configScreen.padding_top - minumumPaddingTop, displayScreen.Bounds.Width, displayScreen.Bounds.Height));
+                                    gWallpaper.DrawImage(wallpaper, new Rectangle(screenWidthUsed, configScreen.padding_top, displayScreen.Bounds.Width, displayScreen.Bounds.Height));
 
                                     //Output debug message
                                     debugMessageOutput("Wallpaper drawn on screen " + configScreen.name);
@@ -445,7 +401,10 @@ namespace MultiScreenWallpaper
         //COMMAND BUTTON TO MANUALLY UPDATE WALLPAPER
         private void cmdUpdate_Click(object sender, EventArgs e)
         {
+            cmdUpdate.Enabled = false;
             loadWallpaper();
+            cmdUpdate.Enabled = true;
+            cmdUpdate.Focus();
         }
 
         //COMMAND BUTTON TO MANUALLY LOAD CONFIG
