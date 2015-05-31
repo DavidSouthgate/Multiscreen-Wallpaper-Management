@@ -58,6 +58,28 @@ namespace MultiScreenWallpaper
             
             InitializeComponent();
 
+            ///////////////////////////////////////////////////////////////////
+            //Hacked in at the momment. Without this SendMessages don't arrive
+            Opacity = 0;
+            this.Show();
+            this.Hide();
+            Opacity = 100;
+            ///////////////////////////////////////////////////////////////////
+
+            //Generates the wallpaper and applies it
+            loadWallpaper();
+
+            string[] args = Environment.GetCommandLineArgs();
+
+            foreach (string arg in args)
+            {
+                if (arg == "-debug")
+                {
+
+                    displayForm();
+                }
+            }
+
             //Add event to run when display settings change
             Microsoft.Win32.SystemEvents.DisplaySettingsChanged += new EventHandler(ScreenHandler);
         }
@@ -84,7 +106,7 @@ namespace MultiScreenWallpaper
                 //Make form visible
                 displayForm();
             }
-                base.WndProc(ref m);
+            base.WndProc(ref m);
         }
 
         //RUNS WHEN DISPLAY SETTINGS CHANGE
@@ -101,17 +123,27 @@ namespace MultiScreenWallpaper
         //CALCULATE TOTAL WALLPAPER SIZE
         private void wallpaperTotalSize(ref int wallpaperTotalWidth, ref int wallpaperTotalHeight, configClass config)
         {
+
+            //For every screen on the system
             foreach (var displayScreen in Screen.AllScreens)
             {
+
+                //Add width of screens together
                 wallpaperTotalWidth = wallpaperTotalWidth + displayScreen.Bounds.Width;
 
+                //For each screen in config
                 foreach (var configScreen in config.screens)
                 {
                 
+                    //If the name of the current system screen is the config screen name
                     if(configScreen.name == displayScreen.DeviceName)
                     {
+
+                        //If the total wallpaper height is smaller than the current screen height
                         if(displayScreen.Bounds.Height + configScreen.padding_top > wallpaperTotalHeight)
                         {
+
+                            //Set total wallpaper height
                             wallpaperTotalHeight = displayScreen.Bounds.Height + configScreen.padding_top;
                         }
                     }
@@ -130,6 +162,15 @@ namespace MultiScreenWallpaper
                 b = Remainder;
             }
             return a;
+        }
+
+        //CALCULATE ASPECT RATIO FROM WIDTH AND HEIGHT
+        private string aspectRatio(int x,   //Width of image
+                                   int y)   //Height of image
+        {
+
+            //Return aspect ratio
+            return string.Format("{0}:{1}", x / GCD(x, y), y / GCD(x, y));
         }
 
         //CLASS USED TO STORE SCREEN CONFIG
@@ -153,15 +194,6 @@ namespace MultiScreenWallpaper
         {
             public List<configScreenClass> screens { get; set; }
             public List<configMiscClass> misc { get; set; }
-        }
-
-        //CALCULATE ASPECT RATIO FROM WIDTH AND HEIGHT
-        private string aspectRatio(int x,   //Width of image
-                                   int y)   //Height of image
-        {
-
-            //Return aspect ratio
-            return string.Format("{0}:{1}", x / GCD(x, y), y / GCD(x, y));
         }
 
         //GENERATES THE WALLPAPER AND APPLIES IT
@@ -329,36 +361,18 @@ namespace MultiScreenWallpaper
             }
         }
 
-        //FORM LOADED
-        private void Form_Load(object sender, EventArgs e)
+        //DISPLAY THE FORM
+        private void displayForm()
         {
-
-            //Make form invisible
-            Opacity = 0;
-
-            //Generates the wallpaper and applies it
-            loadWallpaper();
-
-            string[] args = Environment.GetCommandLineArgs();
-
-            foreach (string arg in args)
-            {
-                if (arg == "-debug")
-                {
-
-                    displayForm();
-                }
-            }
+            this.Show();
+            debugMessageOutput("Debug form has been displayed");
         }
 
-        //FORM DISPLAYED
-        private void Form_Shown(object sender, EventArgs e)
+        //HIDE THE FORM
+        private void hideForm()
         {
-
-            //Make form invisible
-            //Visible = false;
-            //Opacity = 100;
-
+            this.Hide();
+            debugMessageOutput("Debug form has been hidden");
         }
 
 
@@ -372,19 +386,130 @@ namespace MultiScreenWallpaper
             public Color ItemColor { get; set; }
             public string Message { get; set; }
         }
+
+        ///////////////////////////////////////////////////////////////////////////////
+        //GUI CODE FOLLOWS
+        ///////////////////////////////////////////////////////////////////////////////
+
+        //RUNS WHEN THE FORM IS LOADED
+        private void frmWallpaperManagement_Load(object sender, EventArgs e)
+        {
+            //Load config in text box
+            guiLoadConfig();
+        }
+
+        //COMMAND BUTTON TO MANUALLY UPDATE WALLPAPER
+        private void cmdUpdate_Click(object sender, EventArgs e)
+        {
+            cmdUpdate.Enabled = false;
+            loadWallpaper();
+            cmdUpdate.Enabled = true;
+            cmdUpdate.Focus();
+        }
+
+        //COMMAND BUTTON TO MANUALLY LOAD CONFIG
+        private void cmdConfigLoad_Click(object sender, EventArgs e)
+        {
+            guiLoadConfig();
+            MessageBox.Show("Config loaded");
+        }
+
+        //COMMAND BUTTON TO MANUALLY SAVE CONFIG
+        private void cmdConfigSave_Click(object sender, EventArgs e)
+        {
+            if (configValidate(txtConfig.Text))
+            {
+                guiSaveConfig();
+            }
+            else
+            {
+                MessageBox.Show("Invalid Config");
+            }
+        }
+
+        //COMMAND BUTTON TO EXIT PROGRAM
+        private void cmdExit_Click(object sender, EventArgs e)
+        {
+            DialogResult d = MessageBox.Show("Are you sure you want to exit?", "Question", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+            if (d == DialogResult.Yes)
+            {
+                Application.Exit();
+            }
+        }
+
+        //COMMAND BUTTON TO VALIDATE CONFIG
+        private void cmdConfigValidate_Click(object sender, EventArgs e)
+        {
+            if (configValidate(txtConfig.Text))
+            {
+                MessageBox.Show("Valid Config");
+            }
+            else
+            {
+                MessageBox.Show("Invalid Config");
+            }
+        }
+
+        //RUNS WHEN TEXT BOX IS CHANGED
+        private void txtConfig_TextChanged(object sender, EventArgs e)
+        {
+            grpConfig.Text = "Config *";
+        }
+
+        //LOAD CONFIG TO TEXT BOX
+        private void guiLoadConfig()
+        {
+            StreamReader streamReader = new StreamReader(Application.StartupPath + @"\config.json");
+            string sConfig = streamReader.ReadToEnd();
+            txtConfig.Text = sConfig;
+            streamReader.Close();
+
+            grpConfig.Text = "Config";
+        }
+
+        //SAVE CONFIG IN TEXT BOX TO FILE
+        private void guiSaveConfig()
+        {
+            StreamWriter streamWriter = new StreamWriter(Application.StartupPath + @"\config.json");
+            streamWriter.Write(txtConfig.Text);
+            streamWriter.Close();
+
+            grpConfig.Text = "Config";
+        }
+
+        //USED TO OUTPUT DEBUG MESSAGES
         private void debugMessageOutput(string message, bool important = false)
         {
-            if(important == true)
+            if (important == true)
             {
                 message = "IMPORTANT: " + message;
             }
 
+            //Add output message to list box
             listOutput.Items.Add(message);
+
+            //Add output message to console
+            Console.WriteLine(message);
+
+            //Auto scroll list box
+            listOutput.SelectedIndex = listOutput.Items.Count - 1;
+            listOutput.SelectedIndex = -1;
         }
-        private void displayForm()
+
+        //VALIDATES CONFIG JSON STRING - RETURNS BOOLEAN
+        private bool configValidate(string json)
         {
-            Opacity = 100;
-            this.ShowInTaskbar = true;
+            var configValidate = new configClass();
+            try
+            {
+                configValidate = JsonConvert.DeserializeObject<configClass>(json);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

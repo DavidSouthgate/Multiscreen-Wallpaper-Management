@@ -15,7 +15,7 @@ namespace MultiScreenWallpaper
         public static readonly int DEBUG = RegisterWindowMessage("DEBUG");
 
         [DllImport("user32")]
-        public static extern bool SendMessage(IntPtr hwnd, int msg, IntPtr wparam, IntPtr lparam);
+        public static extern bool PostMessage(IntPtr hwnd, int msg, IntPtr wparam, IntPtr lparam);
         [DllImport("user32")]
         public static extern int RegisterWindowMessage(string message);
     }

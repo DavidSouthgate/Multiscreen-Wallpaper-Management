@@ -22,10 +22,11 @@ namespace MultiScreenWallpaper
             //If an instance of the program isn't running
             if (mutex.WaitOne(TimeSpan.Zero, true))
             {
-
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
-                Application.Run(new frmWallpaperManagement());
+
+                new frmWallpaperManagement();
+                Application.Run();
 
                 //Relase Mutex
                 mutex.ReleaseMutex();
@@ -45,11 +46,13 @@ namespace MultiScreenWallpaper
                     {
 
                         //Send update message to already running process
-                        NativeMethods.SendMessage(
+                        NativeMethods.PostMessage(
                             (IntPtr)NativeMethods.HWND_BROADCAST,
                             NativeMethods.UPDATE,
                             IntPtr.Zero,
                             IntPtr.Zero);
+
+
                     }
 
                     //If argument is for debug
@@ -57,7 +60,7 @@ namespace MultiScreenWallpaper
                     {
 
                         //Send debug message to already running process
-                        NativeMethods.SendMessage(
+                        NativeMethods.PostMessage(
                             (IntPtr)NativeMethods.HWND_BROADCAST,
                             NativeMethods.DEBUG,
                             IntPtr.Zero,
