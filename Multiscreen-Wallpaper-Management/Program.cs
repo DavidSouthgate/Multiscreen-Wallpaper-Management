@@ -66,6 +66,11 @@ namespace MultiScreenWallpaper
                             IntPtr.Zero,
                             IntPtr.Zero);
                     }
+
+                    else
+                    {
+                        MessageBox.Show("Program already running and/or invalid command line option");
+                    }
                 }
             }
         }
