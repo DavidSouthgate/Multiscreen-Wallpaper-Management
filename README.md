@@ -14,25 +14,24 @@ Popular high-performance JSON framework for .NET
 <b>Not Supported:</b></br>
 <img src="https://i.imgur.com/MxD7reU.png"></img>
 
-* The location of the top edge of all monitors must be the same.</br>
-<b>Supported:</b></br>
-<img src="https://i.imgur.com/alXlsn1.png"></img> </br>
-<b>Not Supported:</b></br>
-<img src="https://i.imgur.com/mhNOmVg.png"></img>
-
 ##Configuration
 The configuration is stored in config.json in the directory of the executable.
 
-[</br>
-&nbsp;&nbsp;&nbsp;[</br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"\\\\.\\DISPLAY2",</br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"\\\\.\\DISPLAY1"</br>
+{</br>
+&nbsp;&nbsp;&nbsp;"screens":[</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"name":"\\\\.\\DISPLAY2",</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"wallpaper":["Example1.png","Example10.png"],</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"padding_top":0</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"name":"\\\\.\\DISPLAY1",</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"wallpaper":["Example2.png"],</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"padding_top":56</br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</br>
 &nbsp;&nbsp;&nbsp;],</br>
-&nbsp;&nbsp;&nbsp;[</br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Screen1.png",</br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Screen2.png"</br>
-&nbsp;&nbsp;&nbsp;]</br>
-]
+&nbsp;&nbsp;&nbsp;"misc":null,</br>
+}
 
 <table border="1">
   <tr>
@@ -46,6 +45,10 @@ The configuration is stored in config.json in the directory of the executable.
   <tr>
     <td>Screen1.png</td>
     <td>Wallpaper that would work best on \\.\DISPLAY2</td>
+  </tr>
+  <tr>
+    <td>Screen10.png</td>
+    <td>Another wallpaper that would work best on \\.\DISPLAY2</td>
   </tr>
   <tr>
     <td>Screen2.png</td>
