@@ -37,6 +37,8 @@ namespace MultiScreenWallpaper
                 //Declare string array used to get command line arguments
                 string[] args = Environment.GetCommandLineArgs();
 
+                bool noArgUsed = true;
+
                 //For each argument
                 foreach (string arg in args)
                 {
@@ -52,7 +54,7 @@ namespace MultiScreenWallpaper
                             IntPtr.Zero,
                             IntPtr.Zero);
 
-
+                        noArgUsed = false;
                     }
 
                     //If argument is for debug
@@ -65,7 +67,14 @@ namespace MultiScreenWallpaper
                             NativeMethods.DEBUG,
                             IntPtr.Zero,
                             IntPtr.Zero);
+
+                        noArgUsed = false;
                     }
+                }
+
+                if(noArgUsed == true)
+                {
+                    MessageBox.Show("Program already running and/or invalid command line option");
                 }
             }
         }
