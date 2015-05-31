@@ -55,33 +55,41 @@ namespace MultiScreenWallpaper
 
         public frmWallpaperManagement()
         {
-            
-            InitializeComponent();
-
-            ///////////////////////////////////////////////////////////////////
-            //Hacked in at the momment. Without this SendMessages don't arrive
-            Opacity = 0;
-            this.Show();
-            this.Hide();
-            Opacity = 100;
-            ///////////////////////////////////////////////////////////////////
-
-            //Generates the wallpaper and applies it
-            loadWallpaper();
-
-            string[] args = Environment.GetCommandLineArgs();
-
-            foreach (string arg in args)
+            if (File.Exists(Application.StartupPath + @"\config.json"))
             {
-                if (arg == "-debug")
-                {
+                InitializeComponent();
 
-                    displayForm();
+                ///////////////////////////////////////////////////////////////////
+                //Hacked in at the momment. Without this SendMessages don't arrive
+                Opacity = 0;
+                this.Show();
+                this.Hide();
+                Opacity = 100;
+                ///////////////////////////////////////////////////////////////////
+
+                //Generates the wallpaper and applies it
+                loadWallpaper();
+
+                string[] args = Environment.GetCommandLineArgs();
+
+                foreach (string arg in args)
+                {
+                    if (arg == "-debug")
+                    {
+
+                        displayForm();
+                    }
                 }
+
+                //Add event to run when display settings change
+                Microsoft.Win32.SystemEvents.DisplaySettingsChanged += new EventHandler(ScreenHandler);
             }
 
-            //Add event to run when display settings change
-            Microsoft.Win32.SystemEvents.DisplaySettingsChanged += new EventHandler(ScreenHandler);
+            else
+            {
+                MessageBox.Show("Wallpaper Management: Config Not Found");
+                Environment.Exit(1);
+            }
         }
 
         //PROCESSES WINDOWS MESSAGES
@@ -203,161 +211,144 @@ namespace MultiScreenWallpaper
             //Output debug message
             debugMessageOutput("Begin loading wallpaper");
 
-            //If the config.json file exists
-            if (File.Exists(Application.StartupPath + @"\config.json"))
+            int i;                          //Declare variable used for an index
+            int wallpaperTotalWidth = 0;    //Declare variable used for total wallpaper width
+            int wallpaperTotalHeight = 0;   //Declare variable used for total wallpaper height
+            string sJson = "";              //Declare variable used to store json from config
+            var config = new configClass(); //Declare variable used to store configuration
+            StreamReader streamReaderJson;  //Declare variable used to open config
+
+            //Read config
+            streamReaderJson = new StreamReader(Application.StartupPath + @"\config.json");
+
+            //Stroe contents of config.json in variable
+            sJson = streamReaderJson.ReadToEnd();
+
+            //Output debug message
+            debugMessageOutput("Read contents of config.json");
+
+            //Attempt to parse string
+            try
             {
-                int i;                          //Declare variable used for an index
-                int wallpaperTotalWidth = 0;    //Declare variable used for total wallpaper width
-                int wallpaperTotalHeight = 0;   //Declare variable used for total wallpaper height
-                string sJson = "";              //Declare variable used to store json from config
-                var config = new configClass(); //Declare variable used to store configuration
-                StreamReader streamReaderJson;  //Declare variable used to open config
 
-                //Read config
-                streamReaderJson = new StreamReader(Application.StartupPath + @"\config.json");
-
-                //Stroe contents of config.json in variable
-                sJson = streamReaderJson.ReadToEnd();
+                //Parse json config
+                config = JsonConvert.DeserializeObject<configClass>(sJson);
 
                 //Output debug message
-                debugMessageOutput("Read contents of config.json");
+                debugMessageOutput("Successfully parsed config");
+            }
 
-                //Attempt to parse string
-                try
-                {
+            //If parsing fails
+            catch
+            {
 
-                    //Parse json config
-                    config = JsonConvert.DeserializeObject<configClass>(sJson);
-
-                    //Output debug message
-                    debugMessageOutput("Successfully parsed config");
-                }
-
-                //If parsing fails
-                catch
-                {
-
-                    //Parse blank config
-                    config = JsonConvert.DeserializeObject<configClass>("[]");
-
-                    //Output debug message
-                    debugMessageOutput("Unsuccessfully parsed config", true);
-                }
-
-                //Get total wallpaper size
-                wallpaperTotalSize(ref wallpaperTotalWidth, ref wallpaperTotalHeight, config);
+                //Parse blank config
+                config = JsonConvert.DeserializeObject<configClass>("[]");
 
                 //Output debug message
-                debugMessageOutput("Total wallpaper size: " + wallpaperTotalWidth + "x" + wallpaperTotalHeight);
+                debugMessageOutput("Unsuccessfully parsed config", true);
+            }
 
-                var imgwallpapers = new List<Image>();      //Declare variable for storing the wallpaper images
+            //Get total wallpaper size
+            wallpaperTotalSize(ref wallpaperTotalWidth, ref wallpaperTotalHeight, config);
 
-                //Reset index counter
-                i = 0;
+            //Output debug message
+            debugMessageOutput("Total wallpaper size: " + wallpaperTotalWidth + "x" + wallpaperTotalHeight);
 
-                //Loop for every wallpaper file
-                foreach (var screens in config.screens)
+            var imgwallpapers = new List<Image>();      //Declare variable for storing the wallpaper images
+
+            //Reset index counter
+            i = 0;
+
+            //Loop for every wallpaper file
+            foreach (var screens in config.screens)
+            {
+
+                Random randomNumber = new Random();                         //Declare variable used to generate random number for random wallpaper
+                int wallpaperCount = screens.wallpaper.Count;               //Declare integer and store wallpaper count in it
+                int wallpaperRandom = randomNumber.Next(0, wallpaperCount); //Generate a random number for random wallpaper
+
+                //If image file exists
+                if (File.Exists(screens.wallpaper[wallpaperRandom]))
                 {
 
-                    Random randomNumber = new Random();                         //Declare variable used to generate random number for random wallpaper
-                    int wallpaperCount = screens.wallpaper.Count;               //Declare integer and store wallpaper count in it
-                    int wallpaperRandom = randomNumber.Next(0, wallpaperCount); //Generate a random number for random wallpaper
-
-                    //If image file exists
-                    if (File.Exists(screens.wallpaper[wallpaperRandom]))
-                    {
-
-                        //Store wallpaper image to variable
-                        imgwallpapers.Add(Image.FromFile(screens.wallpaper[wallpaperRandom]));
-                    }
-
-                    //Add one to index
-                    i++;
+                    //Store wallpaper image to variable
+                    imgwallpapers.Add(Image.FromFile(screens.wallpaper[wallpaperRandom]));
                 }
-                
-                //Create wallpaper template
-                Image imgWallpaper = new Bitmap(wallpaperTotalWidth, wallpaperTotalHeight);
 
-                //Convert wallpaper template to graphic
-                Graphics gWallpaper = Graphics.FromImage(imgWallpaper);
+                //Add one to index
+                i++;
+            }
 
-                //Declare variable used for tracking width used
-                int screenWidthUsed = 0;
+            //Create wallpaper template
+            Image imgWallpaper = new Bitmap(wallpaperTotalWidth, wallpaperTotalHeight);
 
-                //Loop for ever screen name
-                foreach (var configScreen in config.screens)
+            //Convert wallpaper template to graphic
+            Graphics gWallpaper = Graphics.FromImage(imgWallpaper);
+
+            //Declare variable used for tracking width used
+            int screenWidthUsed = 0;
+
+            //Loop for ever screen name
+            foreach (var configScreen in config.screens)
+            {
+
+                //Loop for every screen
+                foreach (var displayScreen in Screen.AllScreens)
                 {
 
-                    //Loop for every screen
-                    foreach (var displayScreen in Screen.AllScreens)
+                    //If the name of the screen is equal to the X screen from config
+                    if (configScreen.name == displayScreen.DeviceName)
                     {
 
-                        //If the name of the screen is equal to the X screen from config
-                        if (configScreen.name == displayScreen.DeviceName)
+                        //Loof for every wallpaper image
+                        foreach (var wallpaper in imgwallpapers)
                         {
 
-                            //Loof for every wallpaper image
-                            foreach (var wallpaper in imgwallpapers)
+                            //If the aspect ration of the wallpaper is equal to the aspect ratio of the screen resolution
+                            if (aspectRatio(displayScreen.Bounds.Width, displayScreen.Bounds.Height) == aspectRatio(wallpaper.Width, wallpaper.Height))
                             {
+                                //Add wallpaper image to template
+                                gWallpaper.DrawImage(wallpaper, new Rectangle(screenWidthUsed, configScreen.padding_top, displayScreen.Bounds.Width, displayScreen.Bounds.Height));
 
-                                //If the aspect ration of the wallpaper is equal to the aspect ratio of the screen resolution
-                                if(aspectRatio(displayScreen.Bounds.Width, displayScreen.Bounds.Height) == aspectRatio(wallpaper.Width, wallpaper.Height))
-                                {
-                                    //Add wallpaper image to template
-                                    gWallpaper.DrawImage(wallpaper, new Rectangle(screenWidthUsed, configScreen.padding_top, displayScreen.Bounds.Width, displayScreen.Bounds.Height));
-
-                                    //Output debug message
-                                    debugMessageOutput("Wallpaper drawn on screen " + configScreen.name);
-                                }
+                                //Output debug message
+                                debugMessageOutput("Wallpaper drawn on screen " + configScreen.name);
                             }
-
-                            //Add screen width to the screen width used
-                            screenWidthUsed = screenWidthUsed + displayScreen.Bounds.Width;
                         }
+
+                        //Add screen width to the screen width used
+                        screenWidthUsed = screenWidthUsed + displayScreen.Bounds.Width;
                     }
-                }
-                
-                //Save wallpaper
-                imgWallpaper.Save("wallpaper.png");
-
-                //Output debug message
-                debugMessageOutput("Saved wallpaper.png");
-
-                //Set wallpaper
-                SetDWallpaper(appPath + "/wallpaper.png");
-
-                //Output debug message
-                debugMessageOutput("Set wallpaper.png as wallpaper");
-
-                //Close the config file
-                streamReaderJson.Close();
-
-                //Set index to 0
-                i = 0;
-
-                //Loop for every image in imgwallpapers
-                foreach(var nul in imgwallpapers)
-                {
-
-                    //Dispose image stored
-                    imgwallpapers[i].Dispose();
-
-                    //Add one to index
-                    i++;
                 }
             }
 
-            else
+            //Save wallpaper
+            imgWallpaper.Save("wallpaper.png");
+
+            //Output debug message
+            debugMessageOutput("Saved wallpaper.png");
+
+            //Set wallpaper
+            SetDWallpaper(appPath + "/wallpaper.png");
+
+            //Output debug message
+            debugMessageOutput("Set wallpaper.png as wallpaper");
+
+            //Close the config file
+            streamReaderJson.Close();
+
+            //Set index to 0
+            i = 0;
+
+            //Loop for every image in imgwallpapers
+            foreach (var nul in imgwallpapers)
             {
 
-                //Output debug message
-                debugMessageOutput("Config not found");
+                //Dispose image stored
+                imgwallpapers[i].Dispose();
 
-                //Display error message when no config exists
-                MessageBox.Show("Wallpaper Management: Config Not Found");
-
-                //Close the program
-                this.Close();
+                //Add one to index
+                i++;
             }
         }
 
@@ -460,6 +451,7 @@ namespace MultiScreenWallpaper
         //LOAD CONFIG TO TEXT BOX
         private void guiLoadConfig()
         {
+
             StreamReader streamReader = new StreamReader(Application.StartupPath + @"\config.json");
             string sConfig = streamReader.ReadToEnd();
             txtConfig.Text = sConfig;
