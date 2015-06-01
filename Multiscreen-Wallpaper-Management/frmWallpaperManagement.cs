@@ -43,7 +43,194 @@ namespace MultiScreenWallpaper
         private static extern bool SystemParametersInfo(uint uiAction, uint uiParam, string pvParam, uint fWinIni);
         const uint SPI_SETDESKWALLPAPER = 0x14;
         const uint SPIF_UPDATEINIFILE = 0x01;
+
         string appPath = Path.GetDirectoryName(Application.ExecutablePath);
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+        configClass config;
+
+        List<int> wallpaperRandomIndexes = new List<int>();
+
+        //Declare variable used to generate random number for random wallpaper
+        Random randomNumber = new Random();
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+
+        //RETURNS CONFIG OBJECT PARSED FROM CONFIG.JSON
+        private configClass loadConfig()
+        {
+            //Read config
+            StreamReader streamReaderConfig = new StreamReader(Application.StartupPath + @"\config.json");
+
+            //Store contents of config.json in variable
+            string json = streamReaderConfig.ReadToEnd();
+
+            //Attempt to parse string
+            try
+            {
+
+                //Parse json config
+                config = JsonConvert.DeserializeObject<configClass>(json);
+
+                streamReaderConfig.Close();
+
+                //Return config
+                return config;
+            }
+
+            //If parsing fails
+            catch
+            {
+
+                //Parse blank config
+                config = JsonConvert.DeserializeObject<configClass>("[]");
+
+                streamReaderConfig.Close();
+
+                //Return config
+                return config;
+            }
+        }
+
+        private void loadWallpaper()
+        {
+
+            //Load config
+            config = loadConfig();
+
+            if (config.update_every > 0 && config.update_every < 2147483647)
+            {
+                update.Interval = config.update_every;
+                update.Enabled = true;
+            }
+            else
+            {
+                update.Enabled = false;
+            }
+
+            //Clear random wallpaper indexes
+            wallpaperRandomIndexes.Clear();
+
+            //Loop for every screen in the config
+            foreach (var screens in config.screens)
+            {
+                
+                //Declare integer and store wallpaper count in it                       
+                int wallpaperCount = screens.wallpaper.Count;
+
+                //Generate a random number for random wallpaper              
+                int wallpaperRandom = randomNumber.Next(0, wallpaperCount);
+
+                //Add random index to list
+                wallpaperRandomIndexes.Add(wallpaperRandom);
+            }
+
+            guiMessageOutput("Wallpaper Loaded");
+
+            displayWallpaper();
+        }
+
+        private void displayWallpaper()
+        {
+
+            //Calculate the minimum top padding
+            int minumumPaddingTop = wallpaperMinimumPaddingTop(config);
+
+            //Declare wallpaper total width and height variables
+            int wallpaperTotalWidth = 0;
+            int wallpaperTotalHeight = 0;
+
+            //Get total wallpaper size
+            wallpaperTotalSize(ref wallpaperTotalWidth, ref wallpaperTotalHeight, config, minumumPaddingTop);
+
+            //Create wallpaper template
+            Image imgWallpaper = new Bitmap(wallpaperTotalWidth, wallpaperTotalHeight);
+
+            //Convert wallpaper template to graphic
+            Graphics gWallpaper = Graphics.FromImage(imgWallpaper);
+
+            //Declare and set index counter
+            int i = 0;
+
+            int screenWidthUsed = 0;
+
+            //Loop for every screen in the config
+            foreach (var configScreen in config.screens)
+            {
+
+                //Loop for every screen
+                foreach (var displayScreen in Screen.AllScreens)
+                {
+
+                    //If the name of the screen is equal to the X screen from config
+                    if (configScreen.name == displayScreen.DeviceName)
+                    {
+
+                        //If image file exists
+                        if (File.Exists(configScreen.wallpaper[wallpaperRandomIndexes[i]]))
+                        {
+
+                            //Store wallpaper image to variable
+                            Image imgScreenWallpaper = Image.FromFile(configScreen.wallpaper[wallpaperRandomIndexes[i]]);
+
+                            gWallpaper.DrawImage(imgScreenWallpaper, new Rectangle(screenWidthUsed, configScreen.padding_top - minumumPaddingTop, displayScreen.Bounds.Width, displayScreen.Bounds.Height));
+
+                            imgScreenWallpaper.Dispose();
+
+                        }
+
+                        //Add screen width to the screen width used
+                        screenWidthUsed = displayScreen.Bounds.Width + screenWidthUsed;
+                    }
+                }
+
+                //Add one to index
+                i++;
+            }
+
+            //Save wallpaper
+            imgWallpaper.Save("wallpaper.png");
+
+            //Set wallpaper
+            SetDWallpaper(appPath + "/wallpaper.png");
+
+            guiMessageOutput("Wallpaper Displayed");
+        }
+
+
+
+
+
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////////////////////////////////////////////////////////////
+
+
+        //CLASS USED TO STORE SCREEN CONFIG
+        public class configScreenClass
+        {
+            public string name { get; set; }
+            public List<string> wallpaper { get; set; }
+            public int padding_top { get; set; }
+        }
+
+        //CLASS USED TO STORE MISC CONFIG
+        public class configMiscClass
+        {
+            public string name { get; set; }
+            public string wallpaper { get; set; }
+            public int padding_top { get; set; }
+        }
+
+        //CLASS USED TO STORE CONFIG
+        public class configClass
+        {
+            public List<configScreenClass> screens { get; set; }
+            public int update_every { get; set; }
+            public List<configMiscClass> misc { get; set; }
+        }
 
         //USED TO SET WALLPAPER
         public void SetDWallpaper(string path)
@@ -74,7 +261,7 @@ namespace MultiScreenWallpaper
 
                 foreach (string arg in args)
                 {
-                    if (arg == "-debug")
+                    if (arg == "-gui")
                     {
 
                         displayForm();
@@ -100,15 +287,15 @@ namespace MultiScreenWallpaper
             if (m.Msg == NativeMethods.UPDATE)
             {
 
-                //Output debug message
-                debugMessageOutput("Message to program saying update");
+                //Output gui message
+                guiMessageOutput("Message to program saying update");
 
                 //Update the wallpaper and set ti
                 loadWallpaper();
             }
 
-            //If message says to show debug
-            else if (m.Msg == NativeMethods.DEBUG)
+            //If message says to show gui
+            else if (m.Msg == NativeMethods.GUI)
             {
 
                 //Make form visible
@@ -121,11 +308,11 @@ namespace MultiScreenWallpaper
         private void ScreenHandler(object sender, EventArgs e)
         {
 
-            //Output debug message
-            debugMessageOutput("Display settings changed");
+            //Output gui message
+            guiMessageOutput("Display settings changed");
 
             //Generates the wallpaper and applies it
-            loadWallpaper();
+            displayWallpaper();
         }
 
         //CALCULATE TOTAL WALLPAPER SIZE
@@ -222,51 +409,29 @@ namespace MultiScreenWallpaper
             return string.Format("{0}:{1}", x / GCD(x, y), y / GCD(x, y));
         }
 
-        //CLASS USED TO STORE SCREEN CONFIG
-        public class configScreenClass
-        {
-            public string name { get; set; }
-            public List<string> wallpaper { get; set; }
-            public int padding_top { get; set; }
-        }
-
-        //CLASS USED TO STORE MISC CONFIG
-        public class configMiscClass
-        {
-            public string name { get; set; }
-            public string wallpaper { get; set; }
-            public int padding_top { get; set; }
-        }
-
-        //CLASS USED TO STORE CONFIG
-        public class configClass
-        {
-            public List<configScreenClass> screens { get; set; }
-            public List<configMiscClass> misc { get; set; }
-        }
 
         //GENERATES THE WALLPAPER AND APPLIES IT
-        private void loadWallpaper()
+        /*private void loadWallpaper_old()
         {
 
-            //Output debug message
-            debugMessageOutput("Begin loading wallpaper");
+            //Output gui message
+            guiMessageOutput("Begin loading wallpaper");
 
             int i;                          //Declare variable used for an index
             int wallpaperTotalWidth = 0;    //Declare variable used for total wallpaper width
             int wallpaperTotalHeight = 0;   //Declare variable used for total wallpaper height
             string sJson = "";              //Declare variable used to store json from config
-            var config = new configClass(); //Declare variable used to store configuration
             StreamReader streamReaderJson;  //Declare variable used to open config
+            configClass config;
 
             //Read config
             streamReaderJson = new StreamReader(Application.StartupPath + @"\config.json");
 
-            //Stroe contents of config.json in variable
+            //Store contents of config.json in variable
             sJson = streamReaderJson.ReadToEnd();
 
-            //Output debug message
-            debugMessageOutput("Read contents of config.json");
+            //Output gui message
+            guiMessageOutput("Read contents of config.json");
 
             //Attempt to parse string
             try
@@ -275,8 +440,8 @@ namespace MultiScreenWallpaper
                 //Parse json config
                 config = JsonConvert.DeserializeObject<configClass>(sJson);
 
-                //Output debug message
-                debugMessageOutput("Successfully parsed config");
+                //Output gui message
+                guiMessageOutput("Successfully parsed config");
             }
 
             //If parsing fails
@@ -286,17 +451,27 @@ namespace MultiScreenWallpaper
                 //Parse blank config
                 config = JsonConvert.DeserializeObject<configClass>("[]");
 
-                //Output debug message
-                debugMessageOutput("Unsuccessfully parsed config", true);
+                //Output gui message
+                guiMessageOutput("Unsuccessfully parsed config", true);
+            }
+
+            if(config.update_every > 0 && config.update_every < 2147483647)
+            {
+                update.Interval = config.update_every;
+                update.Enabled = true;
+            }
+            else
+            {
+                update.Enabled = false;
             }
 
             int minumumPaddingTop = wallpaperMinimumPaddingTop(config);
 
             //Get total wallpaper size
             wallpaperTotalSize(ref wallpaperTotalWidth, ref wallpaperTotalHeight, config, minumumPaddingTop);
-            
-            //Output debug message
-            debugMessageOutput("Total wallpaper size: " + wallpaperTotalWidth + "x" + wallpaperTotalHeight);
+
+            //Output gui message
+            guiMessageOutput("Total wallpaper size: " + wallpaperTotalWidth + "x" + wallpaperTotalHeight);
 
             var imgwallpapers = new List<Image>();      //Declare variable for storing the wallpaper images
 
@@ -314,8 +489,8 @@ namespace MultiScreenWallpaper
                 //If image file exists
                 if (File.Exists(screens.wallpaper[wallpaperRandom]))
                 {
-                    //Output debug message
-                    debugMessageOutput("Using " + screens.wallpaper[wallpaperRandom]);
+                    //Output gui message
+                    guiMessageOutput("Using " + screens.wallpaper[wallpaperRandom]);
 
                     //Store wallpaper image to variable
                     imgwallpapers.Add(Image.FromFile(screens.wallpaper[wallpaperRandom]));
@@ -355,8 +530,9 @@ namespace MultiScreenWallpaper
                             {
                                 //Add wallpaper image to template
                                 gWallpaper.DrawImage(wallpaper, new Rectangle(screenWidthUsed, configScreen.padding_top - minumumPaddingTop, displayScreen.Bounds.Width, displayScreen.Bounds.Height));
-                                //Output debug message
-                                debugMessageOutput("Wallpaper drawn on screen " + configScreen.name);
+                                
+                                //Output gui message
+                                guiMessageOutput("Wallpaper drawn on screen " + configScreen.name);
                             }
                         }
 
@@ -369,14 +545,14 @@ namespace MultiScreenWallpaper
             //Save wallpaper
             imgWallpaper.Save("wallpaper.png");
 
-            //Output debug message
-            debugMessageOutput("Saved wallpaper.png");
+            //Output gui message
+            guiMessageOutput("Saved wallpaper.png");
 
             //Set wallpaper
             SetDWallpaper(appPath + "/wallpaper.png");
 
-            //Output debug message
-            debugMessageOutput("Set wallpaper.png as wallpaper");
+            //Output gui message
+            guiMessageOutput("Set wallpaper.png as wallpaper");
 
             //Close the config file
             streamReaderJson.Close();
@@ -394,26 +570,32 @@ namespace MultiScreenWallpaper
                 //Add one to index
                 i++;
             }
-        }
+
+            imgwallpapers.Clear();
+
+            imgWallpaper.Dispose();
+
+            gWallpaper.Dispose();
+        }*/
 
         //DISPLAY THE FORM
         private void displayForm()
         {
             this.Show();
-            debugMessageOutput("Debug form has been displayed");
+            guiMessageOutput("GUI form has been displayed");
         }
 
         //HIDE THE FORM
         private void hideForm()
         {
             this.Hide();
-            debugMessageOutput("Debug form has been hidden");
+            guiMessageOutput("GUI form has been hidden");
         }
 
 
-        public class debugListItem
+        public class guiListItem
         {
-            public debugListItem(Color c, string m)
+            public guiListItem(Color c, string m)
             {
                 ItemColor = c;
                 Message = m;
@@ -422,9 +604,16 @@ namespace MultiScreenWallpaper
             public string Message { get; set; }
         }
 
+        private void update_Tick(object sender, EventArgs e)
+        {
+            loadWallpaper();
+        }
+
         ///////////////////////////////////////////////////////////////////////////////
         //GUI CODE FOLLOWS
         ///////////////////////////////////////////////////////////////////////////////
+
+        bool configModified;
 
         //RUNS WHEN THE FORM IS LOADED
         private void frmWallpaperManagement_Load(object sender, EventArgs e)
@@ -446,7 +635,8 @@ namespace MultiScreenWallpaper
         private void cmdConfigLoad_Click(object sender, EventArgs e)
         {
             guiLoadConfig();
-            MessageBox.Show("Config loaded");
+            lblConfigStatus.ForeColor = Color.Green;
+            lblConfigStatus.Text = "Config loaded";
         }
 
         //COMMAND BUTTON TO MANUALLY SAVE CONFIG
@@ -455,11 +645,22 @@ namespace MultiScreenWallpaper
             if (configValidate(txtConfig.Text))
             {
                 guiSaveConfig();
+                configModified = false;
+                lblConfigStatus.ForeColor = Color.Green;
+                lblConfigStatus.Text = "Config saved";
             }
             else
             {
-                MessageBox.Show("Invalid Config");
+                lblConfigStatus.ForeColor = Color.Red;
+                lblConfigStatus.Text = "Invalid config";
             }
+        }
+
+        //COMMAND BUTTON TO HIDE PROGRAM
+        private void cmdHide_Click(object sender, EventArgs e)
+        {
+            this.Hide();
+            guiMessageOutput("GUI Hidden");
         }
 
         //COMMAND BUTTON TO EXIT PROGRAM
@@ -478,11 +679,13 @@ namespace MultiScreenWallpaper
         {
             if (configValidate(txtConfig.Text))
             {
-                MessageBox.Show("Valid Config");
+                lblConfigStatus.ForeColor = Color.Green;
+                lblConfigStatus.Text = "Valid config";
             }
             else
             {
-                MessageBox.Show("Invalid Config");
+                lblConfigStatus.ForeColor = Color.Red;
+                lblConfigStatus.Text = "Invalid config";
             }
         }
 
@@ -490,6 +693,7 @@ namespace MultiScreenWallpaper
         private void txtConfig_TextChanged(object sender, EventArgs e)
         {
             grpConfig.Text = "Config *";
+            configModified = true;
         }
 
         //LOAD CONFIG TO TEXT BOX
@@ -497,25 +701,41 @@ namespace MultiScreenWallpaper
         {
 
             StreamReader streamReader = new StreamReader(Application.StartupPath + @"\config.json");
-            string sConfig = streamReader.ReadToEnd();
-            txtConfig.Text = sConfig;
+            string configJson = streamReader.ReadToEnd();
+            txtConfig.Text = configJson;
             streamReader.Close();
 
+            var config_edit = new configClass();
+            config_edit = JsonConvert.DeserializeObject<configClass>(configJson);
+            txtAutoUpdate.Text = Convert.ToString(config_edit.update_every);
+
+            
+
+            //JsonFormat.FormatJson()
             grpConfig.Text = "Config";
+            configModified = false;
         }
 
         //SAVE CONFIG IN TEXT BOX TO FILE
         private void guiSaveConfig()
         {
+
+            var config_edit = new configClass();
+            config_edit = JsonConvert.DeserializeObject<configClass>(txtConfig.Text);
+
+            var configJson = JsonConvert.SerializeObject(config_edit, Formatting.Indented);
+
             StreamWriter streamWriter = new StreamWriter(Application.StartupPath + @"\config.json");
-            streamWriter.Write(txtConfig.Text);
+            streamWriter.Write(configJson);
             streamWriter.Close();
+
+            guiLoadConfig();
 
             grpConfig.Text = "Config";
         }
 
-        //USED TO OUTPUT DEBUG MESSAGES
-        private void debugMessageOutput(string message, bool important = false)
+        //USED TO OUTPUT GUI MESSAGES
+        private void guiMessageOutput(string message, bool important = false)
         {
             if (important == true)
             {
@@ -545,6 +765,43 @@ namespace MultiScreenWallpaper
             catch
             {
                 return false;
+            }
+        }
+
+        private void cmdAutoUpdateSave_Click(object sender, EventArgs e)
+        {
+            int updateEvery;
+            bool updateEveryCheck = Int32.TryParse(txtAutoUpdate.Text, out updateEvery);
+
+            if (configModified == true)
+            {
+                lblConfigStatus.ForeColor = Color.Red;
+                lblConfigStatus.Text = "Config modified but not saved";
+            }
+            else if (updateEveryCheck == false)
+            {
+                lblConfigStatus.ForeColor = Color.Red;
+                lblConfigStatus.Text = "Auto update value not integer";
+            }
+            else
+            {
+                StreamReader streamReader = new StreamReader(Application.StartupPath + @"\config.json");
+                string configJson = streamReader.ReadToEnd();
+                streamReader.Close();
+
+                var config = new configClass();
+                config = JsonConvert.DeserializeObject<configClass>(configJson);
+
+                config.update_every = Convert.ToInt32(txtAutoUpdate.Text);
+
+                configJson = JsonConvert.SerializeObject(config, Formatting.Indented);
+
+                StreamWriter streamWriter = new StreamWriter(Application.StartupPath + @"\config.json");
+                streamWriter.Write(configJson);
+                streamWriter.Close();
+
+                guiLoadConfig();
+                loadWallpaper();
             }
         }
     }
