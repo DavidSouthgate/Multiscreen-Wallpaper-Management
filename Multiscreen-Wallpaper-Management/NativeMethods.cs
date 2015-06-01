@@ -12,7 +12,7 @@ namespace MultiScreenWallpaper
         public const int HWND_BROADCAST = 0xffff;
 
         public static readonly int UPDATE = RegisterWindowMessage("UPDATE");
-        public static readonly int DEBUG = RegisterWindowMessage("DEBUG");
+        public static readonly int GUI = RegisterWindowMessage("GUI");
 
         [DllImport("user32")]
         public static extern bool PostMessage(IntPtr hwnd, int msg, IntPtr wparam, IntPtr lparam);

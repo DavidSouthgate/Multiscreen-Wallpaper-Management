@@ -58,13 +58,13 @@ namespace MultiScreenWallpaper
                     }
 
                     //If argument is for debug
-                    else if (arg == "-debug")
+                    else if (arg == "-gui")
                     {
 
                         //Send debug message to already running process
                         NativeMethods.PostMessage(
                             (IntPtr)NativeMethods.HWND_BROADCAST,
-                            NativeMethods.DEBUG,
+                            NativeMethods.GUI,
                             IntPtr.Zero,
                             IntPtr.Zero);
 
