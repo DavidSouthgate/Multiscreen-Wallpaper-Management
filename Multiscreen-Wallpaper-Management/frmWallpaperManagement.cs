@@ -370,6 +370,9 @@ namespace MultiScreenWallpaper
 
                             //Set minimum padding to first screen top padding
                             minumumPaddingTop = configScreen.padding_top;
+
+                            //Set flag so that boolean flag is set
+                            minumumPaddingTopFirstSet = true;
                         }
 
                         //Otherwise, of screen top padding is smaller than the minimum top padding
@@ -383,7 +386,8 @@ namespace MultiScreenWallpaper
                 }
             }
 
-            return minumumPaddingTop;
+            //return minumumPaddingTop;
+            return 0;
         }
 
 
