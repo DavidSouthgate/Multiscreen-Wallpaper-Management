@@ -1,4 +1,6 @@
 # Multiscreen Wallpaper Management
+> **I currently use only 1 monitor on my primary machine so this project is temporarilly on hold. For now.**
+
 This allows wallpapers to be managed in a multiple monitor setup. If resolution and configuration changes the program will recalculate the wallpaper.
 
 E.g. If the user uses WIN+P to adjust monitor configuration. The wallpaper will be adjusted so that it still looks correct.
