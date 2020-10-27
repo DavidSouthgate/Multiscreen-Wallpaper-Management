@@ -1,9 +1,10 @@
 # Multiscreen Wallpaper Management
-> **I currently use only 1 monitor on my primary machine so this project is temporarilly on hold. For now.**
-
 This allows wallpapers to be managed in a multiple monitor setup. If resolution and configuration changes the program will recalculate the wallpaper.
 
 E.g. If the user uses WIN+P to adjust monitor configuration. The wallpaper will be adjusted so that it still looks correct.
+
+## Status [Updated 2020-10-27]
+This project was designed for Windows 8 and may not work with newer versions of Windows. As I no longer use Windows as my primary Operating System this project will receive no more updates.
 
 ## Requirements
 * <a href="http://www.newtonsoft.com/json">Json.NET</a> </br>
@@ -11,9 +12,13 @@ Popular high-performance JSON framework for .NET
 
 ## Known Issues and Constraints
 * Vertical monitor configurations are not currently supported. </br>
-<b>Supported:</b></br>
-<img src="https://i.imgur.com/alXlsn1.png"></img> </br>
-<b>Not Supported:</b></br>
+
+<b>Supported:</b>
+
+<img src="https://i.imgur.com/alXlsn1.png"></img>
+
+<b>Not Supported:</b>
+
 <img src="https://i.imgur.com/MxD7reU.png"></img>
 
 ## Configuration
