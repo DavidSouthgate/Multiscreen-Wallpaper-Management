@@ -19,21 +19,23 @@ Popular high-performance JSON framework for .NET
 ## Configuration
 The configuration is stored in config.json in the directory of the executable.
 
-{</br>
-&nbsp;&nbsp;&nbsp;"screens":[</br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"name":"\\\\.\\DISPLAY2",</br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"wallpaper":["Example1.png","Example10.png"],</br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"padding_top":0</br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;},</br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"name":"\\\\.\\DISPLAY1",</br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"wallpaper":["Example2.png"],</br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"padding_top":56</br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</br>
-&nbsp;&nbsp;&nbsp;],</br>
-&nbsp;&nbsp;&nbsp;"misc":null,</br>
+```
+{
+	"screens":[
+		{
+			"name":"\\\\.\\DISPLAY2",
+			"wallpaper":["Example1.png","Example10.png"],
+			"padding_top":0
+		},
+		{
+			"name":"\\\\.\\DISPLAY1",
+			"wallpaper":["Example2.png"],
+			"padding_top":56
+		}
+	],
+	"misc":null,
 }
+```
 
 <table border="1">
   <tr>
