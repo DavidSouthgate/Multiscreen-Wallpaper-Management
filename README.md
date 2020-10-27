@@ -16,7 +16,7 @@ Popular high-performance JSON framework for .NET
 <b>Not Supported:</b></br>
 <img src="https://i.imgur.com/MxD7reU.png"></img>
 
-##Configuration
+## Configuration
 The configuration is stored in config.json in the directory of the executable.
 
 {</br>
